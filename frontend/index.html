@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Go構造体とJSONを学ぶ</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+JP:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="bg"></div>
+
+  <header class="site-header">
+    <p class="brand">API Lesson</p>
+    <h1>なぜ構造体をそのまま送らず、<br />JSONに変換するのか</h1>
+    <p class="lead">
+      両方を JSON 風に書くと見分けがつきません。
+      下のデモでは、構造体を <strong>Goの書き方</strong>、JSONを <strong>送るためのテキスト</strong> として並べて見せます。
+    </p>
+  </header>
+
+  <main>
+    <section class="panel why">
+      <h2>ポイント（ここだけ覚えればOK）</h2>
+      <ol class="points">
+        <li>
+          <strong>構造体</strong>は Go のメモリ上の「型付きデータ」。
+          他の言語やブラウザはそのまま読めません。
+        </li>
+        <li>
+          <strong>JSON</strong>は言語を問わず使える「テキストの約束事」。
+          HTTPでデータをやり取りするときの共通語です。
+        </li>
+        <li>
+          だから API では
+          <code>構造体 ↔ JSON</code> の変換が必要になります。
+        </li>
+      </ol>
+      <div class="flow">
+        <div class="flow-box">Go 構造体</div>
+        <div class="flow-arrow">
+          <span>Marshal<br />（送るとき）</span>
+        </div>
+        <div class="flow-box accent">JSON</div>
+        <div class="flow-arrow">
+          <span>Unmarshal<br />（受け取るとき）</span>
+        </div>
+        <div class="flow-box">Go 構造体</div>
+      </div>
+    </section>
+
+    <section class="grid-2">
+      <article class="panel">
+        <h2>① Marshal（マーシャル）</h2>
+        <p class="hint">
+          <em>いつ使う？</em>
+          サーバーがレスポンスを返すとき。
+          例: 書籍一覧をブラウザに返す GET API
+        </p>
+        <button id="btn-marshal" type="button">構造体 → JSON に変換して見る</button>
+        <div id="marshal-out" class="out rich" aria-live="polite">ここに結果が表示されます</div>
+      </article>
+
+      <article class="panel">
+        <h2>② Unmarshal（アンマーシャル）</h2>
+        <p class="hint">
+          <em>いつ使う？</em>
+          サーバーがリクエストを受け取るとき。
+          例: 新規登録フォームからの POST API
+        </p>
+        <label for="json-input">JSON文字列を編集して送信</label>
+        <textarea id="json-input" rows="8" spellcheck="false">{
+  "id": 10,
+  "title": "私の最初の本",
+  "author": "初学者",
+  "year": 2026
+}</textarea>
+        <button id="btn-unmarshal" type="button">JSON → 構造体 に変換して見る</button>
+        <div id="unmarshal-out" class="out rich" aria-live="polite">ここに結果が表示されます</div>
+      </article>
+    </section>
+
+    <section class="panel">
+      <h2>③ 本物の API 連携（書籍メモ）</h2>
+      <p class="hint">
+        フロントが JSON を送り、Go が Unmarshal → 保存 → Marshal して返します。
+        実際の Web アプリと同じ流れです。
+      </p>
+
+      <form id="book-form" class="book-form">
+        <div class="fields">
+          <label>
+            タイトル
+            <input name="title" required placeholder="例: Docker入門" />
+          </label>
+          <label>
+            著者
+            <input name="author" required placeholder="例: 鈴木一郎" />
+          </label>
+          <label>
+            出版年
+            <input name="year" type="number" required value="2026" />
+          </label>
+        </div>
+        <button type="submit">POST /api/books（Unmarshalして保存）</button>
+      </form>
+
+      <div class="list-header">
+        <h3>書籍一覧</h3>
+        <button id="btn-reload" type="button" class="ghost">GET /api/books（Marshalして取得）</button>
+      </div>
+      <ul id="book-list" class="book-list"></ul>
+      <pre id="api-log" class="out">通信ログがここに出ます</pre>
+    </section>
+  </main>
+
+  <footer>
+    <p>API: <code id="api-base-label"></code></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
